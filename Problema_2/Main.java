@@ -5,111 +5,58 @@ import java.lang.*;
 
 	public class Main{
 
-		/** Campo **/
-		private static Integer [][] campo;
+		
 		/** Precio de MataPlagas**/
 		private static Integer precio;
+		/** Campo **/
+		private static FenwickTree2d kampo;
 
 		public static void main(String[] args)throws IOException{
 
-			try{
-			 	BufferedReader br= new BufferedReader(new InputStreamReader(System.in));
+			
+			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        	//PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
+
 			 	String linea;
 			 	int contador=0;
 			 	String[] textoSeparado;
-			 	while((linea=br.readLine())!= null ){
+			 	while((linea = br.readLine()) != null && !linea.equals("0 0 0")){
 			 		textoSeparado=linea.split(" "); /**Desglosamos la línea de entrada**/
 
-			 		if(textoSeparado[0].equals("0") && textoSeparado[1].equals("0") && textoSeparado[2].equals("0"))return; /**Termina el programa**/
-			 		if(contador<=0){ 
-			 			/**Creamos un campo**/
-			 			campo= new Integer[Integer.parseInt(textoSeparado[0])][Integer.parseInt(textoSeparado[1])];
-			 			precio=Integer.parseInt(textoSeparado[2]);
-
-			 		}else if(contador>0 && textoSeparado[0].equals("A")){ //Recibimos Mensajes
-			 			Plaga plaga= new Plaga(Integer.parseInt(textoSeparado[1]),  Integer.parseInt(textoSeparado[2]), Integer.parseInt(textoSeparado[3]));
-			 			Integer existe=campo[plaga.getY()][plaga.getX()];
-			 			if(existe!=null){
-			 				existe+=plaga.getNumeroDePlagas();
-			 				campo[plaga.getY()][plaga.getX()]= existe;
-			 			}else{
-			 				campo[plaga.getY()][plaga.getX()]= plaga.getNumeroDePlagas();
-
-			 			}
-			 			
-
-			 			//System.out.println(plaga.toString());
-			 		}else if(textoSeparado[0].equals("P")){
-
-			 			Integer x1=Integer.parseInt(textoSeparado[1]);
-			 			Integer y1=Integer.parseInt(textoSeparado[2]);
-			 			Integer x2=Integer.parseInt(textoSeparado[3]);
-			 			Integer y2=Integer.parseInt(textoSeparado[4]);
-			 			Pregunta pregunta=new Pregunta(x1,y1,x2,y2);
-			 			
-						
-
-						int acumulado=0;//Devuelve la suma pedida
-
-						
-						if(pregunta.recorreTodo()){
-							Integer elMasPequenoX=x1<=x2?x1:x2;
-
-						Integer elMasPequenoY=y1<y2?y1:y2;//elMasPequenoX==x1?y1: y2;
-
-						Integer elMasGrandeX= elMasPequenoX==x1? x2:x1;
-
-						Integer elMasGrandeY= y1>y2?y1:y2;//elMasGrandeX==x2?y2: y1;
-							for(int i=elMasPequenoX; i<=elMasGrandeX; i++){
-								
-								for(int j=elMasPequenoY; j<= elMasGrandeY; j++){
-										if(campo[j][i]==null)campo[j][i]=0;
-										acumulado+=campo[j][i];
-								}
-							}
-								
-						}else if(pregunta.recorreDerecha()){
-								Integer elMasPequenoX=x1<=x2?x1:x2;
-								Integer dependeDeX=elMasPequenoX==x1? y1:y2;//Se quedara fijo
-								Integer elMasGrandeX= x1>x2? x1:x2;
-								for(int i=elMasPequenoX; i<=elMasGrandeX; i++){
-									if(campo[dependeDeX][i]==null)campo[dependeDeX][i]=0;
-										acumulado+=campo[dependeDeX][i];
-								}
-						}else if(pregunta.recorreAbajo()){
-								Integer elMasPequenoY= y1<y2?y1:y2;
-								Integer dependeDeY=elMasPequenoY==y1?x1:x2;
-								Integer elMasGrandeY=y1>y2?y1:y2;
-								for(int i=elMasPequenoY; i<=elMasGrandeY; i++){
-									if(campo[i][dependeDeY]==null)campo[i][dependeDeY]=0;
-										acumulado+=campo[i][dependeDeY];
-								}
-
-							}
-						//System.out.println(pregunta.toString());
-						System.out.println(acumulado*precio);
-		 			
-						}
-						
-			 				/*for(int i=0; i<campo.length ;i++)
-			 					for(int j=0; j<campo.length; j++)
-			 						if(campo[j][i]!=null)
-			 							System.out.println("Campo ["+j+"]["+i+"] : "+ campo[j][i]);
-			 						else
-			 							System.out.println("Campo ["+j+"]["+i+"] : "+ "null");*/
-			 			
-			 				contador++;
-			 			}//FIN DEL WHILE
-				 		
-			 		System.out.println("");
-			 		br.close();
 			 		
+	
+			 		kampo = new FenwickTree2d(Integer.parseInt(textoSeparado[0]) + 1, Integer.parseInt(textoSeparado[1]) + 1);
+			 		precio = Integer.parseInt(textoSeparado[2].trim());
 
-			}catch(Exception e){
-				System.out.println(e.toString());
+			 		int q = Integer.parseInt(br.readLine().trim());
+
+			 		for(int a = 0 ;a < q; a++){
+			 			 textoSeparado = br.readLine().split(" ");
+
+			 			 if(textoSeparado[0].equals("A")){ //Recibimos Mensajes
+			 				Plaga plaga= new Plaga(Integer.parseInt(textoSeparado[1].trim()),  Integer.parseInt(textoSeparado[2].trim()), Integer.parseInt(textoSeparado[3].trim()));
+			 				kampo.agrega(plaga.getX(), plaga.getY(), plaga.getNumeroDePlagas());
+			 			//System.out.println(plaga.toString());
+			 			}else if(textoSeparado[0].equals("P")){
+			 				Integer x1= Integer.parseInt(textoSeparado[1]);
+			 				Integer y1= Integer.parseInt(textoSeparado[2]);
+			 				Integer x2 = Integer.parseInt(textoSeparado[3]);
+			 				Integer y2= Integer.parseInt(textoSeparado[4]);
+			 				int resultado=kampo.suma(Math.min(x1,x2),Math.min(y1,y2),Math.max(x1,x2),Math.max(y1,y2));
+			 				System.out.print(resultado*precio + "\n");
+						}
+
+
+			 		}
+					System.out.print("\n");
+					//System.out.flush();
+
+			
 			}
 			
+		
 		}
+
 
 
 static class Plaga{
@@ -139,60 +86,49 @@ static class Plaga{
 			}
 		}
 
-		static class Pregunta{
-			private Integer x1;
-			private Integer y1;
-			private Integer x2;
-			private Integer y2;
-			Pregunta(Integer x1,Integer y1, Integer x2, Integer y2){
-				this.x1=x1;
-				this.x2=x2;
-				this.y1=y1;
-				this.y2=y2;
-			}
-
-			public boolean recorreDerecha(){
-				return y1==y2 && x1!=x2;
-			}
-
-			public boolean recorreAbajo(){
-				return x1==x2 && y1!=y2;
-			}
-
-			public boolean recorreTodo(){
-				return x1!=x2 && y1!=y2;
-			}
-
-			@Override
-			public String toString(){
-				return "De: ("+x1+", "+y1+") a ("+x2+", "+ y2+")";
-			}
-		}
-
-
-	}
 		
 
-	 	
+		static class FenwickTree2d{
+			private int[][] interno;
+			private int maxX,maxY;
+
+			public FenwickTree2d(int maxX, int maxY){
+				this.maxX=maxX;
+				this.maxY=maxY;
+				this.interno= new int[maxX][maxY];
+			}	
+
+			public void agrega(int x, int y, int valor){
+				for (int i = x; i < interno.length; i |= i + 1)
+            		for (int j = y; j < interno[0].length; j |= j + 1)
+                		interno[i][j] += valor;
+			}
+
+			/**
+			*
+			*suma ([0][0]) ([x][y])
+			*/
+			public int suma(int x, int y){
+				int resultado = 0;
+       		 for (int i = x; i >= 0; i = (i & (i + 1)) - 1)
+            	for (int j = y; j >= 0; j = (j & (j + 1)) - 1)
+                	resultado += interno[i][j];
+        	return resultado;
+			}
+
+			public int suma(int x1, int y1, int x2, int y2){
+				return suma(x2, y2) - suma(x1 - 1, y2) - suma(x2, y1 - 1) + suma(x1 - 1, y1 - 1);
+			}
+
+			public int get(int x, int y) {
+        		return suma(x, y, x, y);
+    		}
+
+    		public void set(int x, int y, int value) {
+        		agrega(x, y, -get(x, y) + value);
+    		}
 
 
+		}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
+	}
