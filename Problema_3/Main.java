@@ -2,11 +2,12 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class Main{
 
-	public static void main(String[] args)throws Exception{
+	public static void main(String[] args)throws IOException{
 		Map<Integer, Equipo> tablero = new HashMap<>();
 		List<Equipo> tablero_f = new LinkedList<>();
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -15,16 +16,28 @@ public class Main{
         //PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
 
 		int instancia=1;
-		while(true){
 
+
+		while(true){
 			String firstToRead=br.readLine();
-			if(firstToRead==null)return;
 			Integer totalDeLineas=Integer.parseInt(firstToRead);
+
         	totalDeLineas = totalDeLineas*(totalDeLineas-1)/2;
-        	for(int i=0; i<= totalDeLineas ; i++){
-        		String[] linea=br.readLine().split(" ");
-        			if(linea.length<=1 && linea[0].equals("0"))continue;
-				
+        	if(totalDeLineas==0){
+        		System.out.println();
+        		return;
+        	}
+        	//System.out.println("Lineas: "+ totalDeLineas );
+        	tablero.clear();
+        	tablero_f.clear();
+
+ 
+
+        	for(int i=0; i<= totalDeLineas-1 ; i++){
+        		String prev=br.readLine();
+        		//System.out.println("PREV: "+ prev);
+
+        		String[] linea=prev.split(" ");
 				Integer x=Integer.parseInt(linea[0]);
 				Integer de_x=Integer.parseInt(linea[1]);
         		Integer z=Integer.parseInt(linea[2]);
@@ -38,27 +51,49 @@ public class Main{
         		}	
 
 
-        		if(tablero.containsKey(z)){
+        		if(tablero.containsKey(z)){// Si Ya habiamos registrado antes al equipo
         			 f= tablero.get(z);
         			f.setNuevo(de_z, de_x);	
         		}else{
         			tablero.put(z, f=new Equipo(z,de_z, de_x));
         		}
-        		        Equipo.setMarcador(e,f);
+        		        Equipo.setMarcador(e, de_x,f , de_z);//Actualizamos el marcador de puntos
         	}//FIN DEL FOR
+        	
 
-        	for(Equipo eq: tablero.values())
+        	
+        	for(Equipo eq: tablero.values()){
+        		//System.out.println(eq.toString() );
         		tablero_f.add(eq);
+        	}
 		
-			System.out.println("Instancia "+instancia);
+
+        	if(instancia>1)
+			System.out.println("\n\nInstancia "+instancia);
+			else{
+			System.out.println("Instancia "+instancia);	
+			}
         	Collections.sort(tablero_f);
-		
-			for(Equipo d: tablero_f)
-				System.out.print(d.getNombreEquipo()+" ");
-			System.out.println(" ");
+			//Collections.reverse(tablero_f);
+
+			int i=1;
+			for(Equipo d: tablero_f){
+
+				if(i==tablero_f.size()){
+					System.out.print(d.getNombreEquipo().trim());
+					
+					//System.out.println(d.getNombreEquipo()+" Puntaje: "+d.getPuntaje()+": ratio: " + d.ratio());
+				}else{
+					//System.out.println(d.getNombreEquipo()+" Puntaje: "+d.getPuntaje() + ": ratio: "+ d.ratio());
+					System.out.print(d.getNombreEquipo()+ " ");
+				}
+
+				i++;
+			}
+			
 			instancia++;
         	
-		}
+			}
 
 
 		}
@@ -73,127 +108,82 @@ public class Main{
 
 
 class Equipo implements Comparable<Equipo>{
-	Integer anotados;
-	Integer contraAnotados;
-	Integer partidasJugadas;
-	Integer promedioCanastasAnotadas=0;
-	Integer puntuacion;
-	Integer actualAnotados=0;
-	Integer actualContraAnotados=0;
-	Integer canastasContraAnotadas=0;
-	Integer nombreEquipo;
-	Equipo(Integer nombreEquipo,Integer anotados, Integer contraAnotados){
-		this.nombreEquipo=nombreEquipo;
-		partidasJugadas=1;
-		this.anotados=anotados;
-		this.contraAnotados=contraAnotados;
-		this.promedioCanastasAnotadas=anotados;
-		this.canastasContraAnotadas+=contraAnotados;
-		this.puntuacion=0;
 
-		actualAnotados=anotados;
-		actualContraAnotados=contraAnotados;
+
+	int points;
+	int pc;//Puntos en contra
+	int pf;//Puntos a favor
+	double ppp;
+	int juegos;
+	int nombre;
+	Equipo(Integer nombre, Integer anotadas, Integer recibidas){
+		this.nombre=nombre;
+		this.pf=anotadas;
+		this.pc=recibidas;
+		this.juegos=0;
+		points=0;
 	}
 
-
-
-	public Integer getNombreEquipo(){
-		return this.nombreEquipo;
-	}
-	public Integer getAnotados(){
-		return this.anotados;
+	public String getNombreEquipo(){
+		return String.valueOf(this.nombre);
 	}
 
-	public void setNuevo(Integer anotados, Integer contraAnotados){
-		this.setActualAnotados(anotados);
-		this.setActualContraAnotados(contraAnotados);
+	public int getPuntaje(){
+		return points;
 	}
-	public void setActualAnotados(Integer i){
-		this.actualAnotados = i;
-		this.setCanastasAnotadas(i);
-	}
-
-	public void setActualContraAnotados(Integer i){
-		this.actualContraAnotados=i;
-		this.setCanastasContraAnotadas(i);
-	}
-
-	public static void setMarcador(Equipo equipo1, Equipo equipo2){
-		if(equipo1.actualAnotados> equipo2.actualAnotados){
-			equipo1.setPuntuacion(2);
-			equipo2.setPuntuacion(1);
-			return;
-		}else if(equipo1.actualAnotados < equipo2.actualAnotados){
-			equipo1.setPuntuacion(1);
-			equipo2.setPuntuacion(2);
-			return;
+	public static void setMarcador(Equipo e, int de_e, Equipo f, int de_f){
+		if(de_e > de_f){
+			e.points+=2;
+			f.points+=1;
+		
+		}else{
+			e.points+=1;
+			f.points+=2;			
 		}
-
-		if(Double.compare(equipo1.ratio(), equipo2.ratio())==1){
-			equipo1.setPuntuacion(2);
-			equipo2.setPuntuacion(1);
-			return ;
-		}else if(Double.compare(equipo1.ratio(), equipo2.ratio())==-1){
-			equipo1.setPuntuacion(1);
-			equipo2.setPuntuacion(2);
-			return ;
-		}
-
-		if(equipo1.getPromedioCanastasAnotadas()> equipo2.getPromedioCanastasAnotadas()){
-			equipo1.setPuntuacion(2);
-			equipo2.setPuntuacion(1);
-			return ;	
-		}else if(equipo1.getPromedioCanastasAnotadas()<equipo2.getPromedioCanastasAnotadas()){
-			equipo1.setPuntuacion(1);
-			equipo2.setPuntuacion(2);
-			return ;
-		}
-
-
-
-
-
+		e.juegos++;
+		f.juegos++;
 	}
 
 
+	public Double getRatio(){//Es la relación entre las anotadas y las recibidas, en caso de que las recibidas sean 0 tomamos al numero de jugadas
+		if(pc==0){
+			ppp= (double)pf/(double)juegos;
+			return ppp;
+		}
+			return (double)pf/(double)pc;
 
-	public int compareToo(Equipo e){
-		return this.anotados -e.anotados;
+
 	}
 
 	@Override
 	public int compareTo(Equipo e){
-		return e.puntuacion-this.puntuacion;
-	}
-
-	public double ratio(){
-		if(this.actualContraAnotados==0)return getPromedioCanastasAnotadas();
-		return this.actualAnotados/this.actualContraAnotados;
-	}
-
-	public void setPuntuacion(Integer puntuacion){
-		this.puntuacion+=puntuacion;
 		
+		if(this.points-e.points==0){
+			if(Double.compare(this.getRatio(),e.getRatio()) == 0 ){
+				if(this.pf == e.pf){
+					return Integer.compare(e.juegos, this.juegos);
+				}
+				return Integer.compare(e.pf, this.pf);
+			}
+			return Double.compare(e.getRatio(),this.getRatio());
+		}
+		return Integer.compare(e.points, this.points);
+			
 	}
 
-	public Integer getPartidasJugadas(){
-		return partidasJugadas;
-	} 
+
+	
 
 
+	public void setNuevo(Integer anotadas, Integer recibidas){
+		pf+=anotadas;
+		pc+=recibidas;
 
-	private void setCanastasAnotadas(Integer i){
-		promedioCanastasAnotadas+=i;
-		this.partidasJugadas+=1;
-		
 	}
 
-	private void setCanastasContraAnotadas(Integer i){
-		this.canastasContraAnotadas+=i;
-	}
-
-	public Integer getPromedioCanastasAnotadas(){
-		return this.promedioCanastasAnotadas/this.partidasJugadas;
+	@Override
+	public String toString(){
+		return "Nombre: "+ this.nombre + " Partidos: " + this.juegos+ " Ratio: "+ this.getRatio()+ " Puntos a favor: "+ this.pf +" Puntos en contra: "+ this.pc + " Puntaje: "+ this.points;
 	}
 }
 
