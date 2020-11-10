@@ -9,10 +9,10 @@ public class Main{
 
 	public static void main(String[] args)throws IOException{
 		Map<Integer, Equipo> tablero = new HashMap<>();
-		List<Equipo> tablero_f = new LinkedList<>();
+
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		Equipo e=null;
-		Equipo f=null;
+		//Equipo e=null;
+		//Equipo f=null;
         //PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
 
 		int instancia=1;
@@ -21,7 +21,7 @@ public class Main{
 		while(true){
 			String firstToRead=br.readLine();
 			Integer totalDeLineas=Integer.parseInt(firstToRead);
-
+			Integer noEquipos=totalDeLineas;
         	totalDeLineas = totalDeLineas*(totalDeLineas-1)/2;
         	if(totalDeLineas==0){
         		System.out.println();
@@ -29,11 +29,13 @@ public class Main{
         	}
         	//System.out.println("Lineas: "+ totalDeLineas );
         	tablero.clear();
-        	tablero_f.clear();
 
- 
+        	Equipo[] arreglo_equipos= new Equipo[noEquipos];
+		 
 
         	for(int i=0; i<= totalDeLineas-1 ; i++){
+        		Equipo f=null;
+        		Equipo e=null; 
         		String prev=br.readLine();
         		//System.out.println("PREV: "+ prev);
 
@@ -43,7 +45,25 @@ public class Main{
         		Integer z=Integer.parseInt(linea[2]);
         		Integer de_z= Integer.parseInt(linea[3]);
 
-        		if(tablero.containsKey(x)){ // Si Ya habiamos registrado antes al equipo
+        		if(arreglo_equipos[x-1]==null)
+        			arreglo_equipos[x-1]=e=new Equipo(x, de_x, de_z);
+        		else{
+        			e=arreglo_equipos[x-1];
+        			//System.out.println(e.toString());
+        			e.setNuevo(de_x,de_z);
+        		}
+
+        		if(arreglo_equipos[z-1]==null)
+        			arreglo_equipos[z-1]=f=new Equipo(z, de_z, de_x);
+        		else{
+        			 f=arreglo_equipos[z-1];
+        			//System.out.println(f.toString());
+        			f.setNuevo(de_z,de_x);
+        		}
+        		
+
+        		Equipo.setMarcador(e, de_x,f , de_z);//Actualizamos el marcador de puntos
+        		/**if(tablero.containsKey(x)){ // Si Ya habiamos registrado antes al equipo
         			 e= tablero.get(x);
         			e.setNuevo(de_x, de_z);
         		}else{
@@ -56,16 +76,17 @@ public class Main{
         			f.setNuevo(de_z, de_x);	
         		}else{
         			tablero.put(z, f=new Equipo(z,de_z, de_x));
-        		}
-        		        Equipo.setMarcador(e, de_x,f , de_z);//Actualizamos el marcador de puntos
+        		}**/
+        		        
         	}//FIN DEL FOR
         	
-
-        	
+        	/**
+        	int j=0;
         	for(Equipo eq: tablero.values()){
         		//System.out.println(eq.toString() );
-        		tablero_f.add(eq);
-        	}
+        		arreglo_equipos[j]=eq;
+        		j++;
+        	}**/
 		
 
         	if(instancia>1)
@@ -73,13 +94,13 @@ public class Main{
 			else{
 			System.out.println("Instancia "+instancia);	
 			}
-        	Collections.sort(tablero_f);
+        	Arrays.sort(arreglo_equipos);
 			//Collections.reverse(tablero_f);
 
 			int i=1;
-			for(Equipo d: tablero_f){
+			for(Equipo d: arreglo_equipos){
 
-				if(i==tablero_f.size()){
+				if(i==arreglo_equipos.length){
 					System.out.print(d.getNombreEquipo().trim());
 					
 					//System.out.println(d.getNombreEquipo()+" Puntaje: "+d.getPuntaje()+": ratio: " + d.ratio());
